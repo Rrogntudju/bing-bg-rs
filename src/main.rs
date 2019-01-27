@@ -1,9 +1,11 @@
-// Téléchargement de l'image Bing du jour et installation comme arrière-plan
+// Téléchargement de l'image Bing du jour et installation comme arrière-plan dans Windows
 use serde_json::value::Value;
 use reqwest::Client;
 use std::error::Error;
-use std::fmt;
+use std::{fmt, env};
 use image::{ImageFormat, load_from_memory_with_format};
+use core::ffi::c_void;
+use winapi::um::winuser::{SystemParametersInfoW, SPI_SETDESKWALLPAPER, SPIF_UPDATEINIFILE, SPIF_SENDCHANGE};
 
 const URL_DESC: &str = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US";
 
@@ -38,11 +40,23 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut resp = client.get(&url_img).send()?;
 
     println!("Transformer en BMP et sauvegarder...");
-    let mut buf: Vec<u8> = vec![];
+    let mut buf: Vec<u8> = vec![]; // on ne peut pas utiliser image::load avec le reader de Response parce qu'il n'implémente pas BufRead + Seek
     resp.copy_to(&mut buf)?;
     let img = load_from_memory_with_format(&buf, ImageFormat::JPEG)?;
-    
+    let mut bmp_path = env::temp_dir();
+    bmp_path.push("bingbg");
+    bmp_path.set_extension("bmp");
+    img.save(&bmp_path)?;
  
+    println!("Configurer l'image comme arrière-plan...");
+    //convertir la chaîne utf-8 en chaîne utf-16 terminée par null
+    let mut path: Vec<u16> = bmp_path.to_str().unwrap().encode_utf16().collect();
+    path.push(0); 
+    let path_ptr: *mut c_void = path.as_mut_ptr() as *mut c_void;
+    let rc = unsafe { SystemParametersInfoW(SPI_SETDESKWALLPAPER, 0, path_ptr , SPIF_UPDATEINIFILE | SPIF_SENDCHANGE)};
 
+    //todo erreurs windows
+
+    println!("Terminé!");
     Ok(())
 }
