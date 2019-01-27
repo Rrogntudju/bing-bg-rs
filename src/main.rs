@@ -12,6 +12,7 @@ const URL_DESC: &str = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0
 #[derive(Debug)]
 pub enum BingError {
     InvalidImageUrl,
+    WinError(String),
 }
 
 impl fmt::Display for BingError {
@@ -20,6 +21,7 @@ impl fmt::Display for BingError {
             BingError::InvalidImageUrl => write!(f, 
                 "La propriété «url» n'est pas dans le descriptif JSON. \nVérifier dans {}",
                 URL_DESC),
+            BingError::WinError(e) => write!(f, "{}", e),
         }
     }
 }
@@ -53,10 +55,16 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut path: Vec<u16> = bmp_path.to_str().unwrap().encode_utf16().collect();
     path.push(0); 
     let path_ptr: *mut c_void = path.as_mut_ptr() as *mut c_void;
-    let rc = unsafe { SystemParametersInfoW(SPI_SETDESKWALLPAPER, 0, path_ptr , SPIF_UPDATEINIFILE | SPIF_SENDCHANGE)};
-
-    //todo erreurs windows
-
+    
+    let rc = unsafe { SystemParametersInfoW(SPI_SETDESKWALLPAPER, 0, path_ptr , SPIF_UPDATEINIFILE | SPIF_SENDCHANGE) };
+    if rc == 0 {
+        return 
+            match std::io::Error::last_os_error().raw_os_error() {
+                Some(e) => Err(From::from(BingError::WinError(format!("SystemParametersInfoW a retourné le code d'erreur {}", e)))),
+                None    => Err(From::from(BingError::WinError(format!("Oups!")))),
+            }
+    }
+   
     println!("Terminé!");
     Ok(())
 }
