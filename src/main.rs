@@ -1,11 +1,13 @@
 // Téléchargement de l'image Bing du jour et installation comme arrière-plan dans Windows
-use serde_json::value::Value;
-use reqwest::Client;
-use std::error::Error;
-use std::{fmt, env};
-use image::{ImageFormat, load_from_memory_with_format};
-use core::ffi::c_void;
-use winapi::um::winuser::{SystemParametersInfoW, SPI_SETDESKWALLPAPER, SPIF_UPDATEINIFILE, SPIF_SENDCHANGE};
+use {
+    serde_json::value::Value,
+    reqwest::Client,
+    std::error::Error,
+    std::{fmt, env},
+    image::{ImageFormat, load_from_memory_with_format},
+    core::ffi::c_void,
+    winapi::um::winuser::{SystemParametersInfoW, SPI_SETDESKWALLPAPER, SPIF_UPDATEINIFILE, SPIF_SENDCHANGE},
+};
 
 const URL_DESC: &str = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US";
 
