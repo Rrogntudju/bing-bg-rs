@@ -28,7 +28,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let desc: Value = client.get(URL_DESC).send()?.json()?;
     let url = desc["images"][0]["url"].as_str();
     if url.is_none() {
-        return Err(From::from(BingError(format!("La propriété «url» est absente du descriptif JSON. Vérifier dans {}", URL_DESC))));
+        return Err(BingError(format!("La propriété «url» est absente du descriptif JSON. Vérifier dans {}", URL_DESC)).into());
     }
     let url_img = "https://www.bing.com".to_owned() + url.unwrap();
 
@@ -54,8 +54,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     if rc == 0 {
         return 
             match std::io::Error::last_os_error().raw_os_error() {
-                Some(e) => Err(From::from(BingError(format!("SystemParametersInfoW a retourné le code d'erreur {}", e)))),
-                None    => Err(From::from(BingError("Oups!".into()))),
+                Some(e) => Err(BingError(format!("SystemParametersInfoW a retourné le code d'erreur {}", e)).into()),
+                None    => Err(BingError("Oups!".into()).into()),
             }
     }
    
