@@ -6,10 +6,10 @@ edition = "2018"
 build = "build/build.rs"
 
 [dependencies]
-reqwest = "0.9.8"
-winapi = {version = "0.3.6", features = ["winuser"] }
+reqwest = "0.9"
+winapi = {version = "0.3", features = ["winuser"] }
 image = "0.21.0"
-serde_json = "1.0.36"
+serde_json = "1.0"
 
 [build-dependencies]
-winres = "0.1.9"
+winres = "0.1"
