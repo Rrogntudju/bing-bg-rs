@@ -65,14 +65,14 @@ fn main() -> Result<(), Box<dyn Error>> {
         )
     };
     if rc == 0 {
-        return match std::io::Error::last_os_error().raw_os_error() {
-            Some(e) => Err(BingError(format!(
+        return Err(match std::io::Error::last_os_error().raw_os_error() {
+            Some(e) => BingError(format!(
                 "SystemParametersInfoW a retourné le code d'erreur {}",
                 e
             ))
-            .into()),
-            None => Err(BingError("Oups!".into()).into()),
-        };
+            .into(),
+            None => BingError("Oups!".into()).into(),
+        });
     }
 
     println!("Terminé!");
