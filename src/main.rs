@@ -1,11 +1,11 @@
 // Téléchargement de l'image Bing du jour et installation comme arrière-plan dans Windows
 use {
-    core::ffi::c_void,
     image::{load_from_memory_with_format, ImageFormat},
-    reqwest::Client,
+    minreq,
     serde_json::value::Value,
     std::error::Error,
     std::{env, fmt},
+    winapi::ctypes::c_void,
     winapi::um::winuser::{
         SystemParametersInfoW, SPIF_SENDCHANGE, SPIF_UPDATEINIFILE, SPI_SETDESKWALLPAPER,
     },
@@ -26,8 +26,7 @@ impl Error for BingError {}
 
 fn main() -> Result<(), Box<dyn Error>> {
     println!("Téléchargement du descriptif de l'image...");
-    let client = Client::builder().build()?;
-    let desc: Value = client.get(URL_DESC).send()?.json()?;
+    let desc: Value = minreq::get(URL_DESC).with_timeout(10).send()?.json()?;
     let url = desc["images"][0]["url"].as_str();
     if url.is_none() {
         return Err(BingError(format!(
@@ -39,12 +38,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     let url_img = "https://www.bing.com".to_owned() + url.unwrap();
 
     println!("Téléchargement de l'image JPEG...");
-    let mut resp = client.get(&url_img).send()?;
+    let resp = minreq::get(&url_img).with_timeout(10).send()?;
 
     println!("Transformer en BMP et sauvegarder...");
-    let mut buf: Vec<u8> = vec![]; // on ne peut pas utiliser image::load avec le reader de Response parce qu'il n'implémente pas BufRead + Seek
-    resp.copy_to(&mut buf)?;
-    let img = load_from_memory_with_format(&buf, ImageFormat::JPEG)?;
+    let img = load_from_memory_with_format(resp.as_bytes(), ImageFormat::JPEG)?;
     let mut bmp_path = env::temp_dir();
     bmp_path.push("bingbg");
     bmp_path.set_extension("bmp");
