@@ -41,7 +41,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let resp = minreq::get(&url_img).with_timeout(10).send()?;
 
     println!("Transformer en BMP et sauvegarder...");
-    let img = load_from_memory_with_format(resp.as_bytes(), ImageFormat::JPEG)?;
+    let img = load_from_memory_with_format(resp.as_bytes(), ImageFormat::Jpeg)?;
     let mut bmp_path = env::temp_dir();
     bmp_path.push("bingbg");
     bmp_path.set_extension("bmp");
