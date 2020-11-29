@@ -3,12 +3,10 @@ use {
     image::{load_from_memory_with_format, ImageFormat},
     minreq,
     serde_json::value::Value,
-    std::error::Error,
     std::env,
+    std::error::Error,
     winapi::ctypes::c_void,
-    winapi::um::winuser::{
-        SystemParametersInfoW, SPIF_SENDCHANGE, SPIF_UPDATEINIFILE, SPI_SETDESKWALLPAPER,
-    },
+    winapi::um::winuser::{SystemParametersInfoW, SPIF_SENDCHANGE, SPIF_UPDATEINIFILE, SPI_SETDESKWALLPAPER},
 };
 
 const URL_DESC: &str = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US";
@@ -18,11 +16,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let desc: Value = minreq::get(URL_DESC).with_timeout(10).send()?.json()?;
     let url = desc["images"][0]["url"].as_str();
     if url.is_none() {
-        return Err(format!(
-            "La propriété «url» est absente du descriptif JSON. Vérifier dans {}",
-            URL_DESC
-        )
-        .into());
+        return Err(format!("La propriété «url» est absente du descriptif JSON. Vérifier dans {}", URL_DESC).into());
     }
     let url_img = "https://www.bing.com".to_owned() + url.unwrap();
 
@@ -42,21 +36,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     path.push(0);
     let path_ptr = path.as_mut_ptr() as *mut c_void;
 
-    let rc = unsafe {
-        SystemParametersInfoW(
-            SPI_SETDESKWALLPAPER,
-            0,
-            path_ptr,
-            SPIF_UPDATEINIFILE | SPIF_SENDCHANGE,
-        )
-    };
+    let rc = unsafe { SystemParametersInfoW(SPI_SETDESKWALLPAPER, 0, path_ptr, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE) };
     if rc == 0 {
         return Err(match std::io::Error::last_os_error().raw_os_error() {
-            Some(e) => format!(
-                "SystemParametersInfoW a retourné le code d'erreur {}",
-                e
-            )
-            .into(),
+            Some(e) => format!("SystemParametersInfoW a retourné le code d'erreur {}", e).into(),
             None => "Oups!".into(),
         });
     }
