@@ -3,7 +3,7 @@ mod bindings {
     windows::include_bindings!();
 }
 
-use bindings::Windows::Win32::WindowsAndMessaging::{SystemParametersInfoW, SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS, SYSTEM_PARAMETERS_INFO_ACTION};
+use bindings::Windows::Win32::WindowsAndMessaging::{SystemParametersInfoW, SYSTEM_PARAMETERS_INFO_ACTION, SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS};
 use {
     core::ffi::c_void,
     image::{load_from_memory_with_format, ImageFormat},
