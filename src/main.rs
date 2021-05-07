@@ -3,7 +3,7 @@ mod bindings {
     windows::include_bindings!();
 }
 
-use bindings::Windows::Win32::WindowsAndMessaging::{SystemParametersInfoW, SystemParametersInfo_fWinIni, SYSTEM_PARAMETERS_INFO_ACTION};
+use bindings::Windows::Win32::WindowsAndMessaging::{SystemParametersInfoW, SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS, SYSTEM_PARAMETERS_INFO_ACTION};
 use {
     core::ffi::c_void,
     image::{load_from_memory_with_format, ImageFormat},
@@ -45,7 +45,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             SYSTEM_PARAMETERS_INFO_ACTION::SPI_SETDESKWALLPAPER,
             0,
             path_ptr,
-            SystemParametersInfo_fWinIni::SPIF_UPDATEINIFILE | SystemParametersInfo_fWinIni::SPIF_SENDCHANGE,
+            SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS::SPIF_UPDATEINIFILE | SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS::SPIF_SENDCHANGE,
         )
     };
     if !rc.as_bool() {

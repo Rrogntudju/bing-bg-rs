@@ -4,7 +4,7 @@ fn main() {
         res.set_icon("build/icon.ico").compile().unwrap();
 
         windows::build!(
-            Windows::Win32::WindowsAndMessaging::{SystemParametersInfoW, SYSTEM_PARAMETERS_INFO_ACTION, SystemParametersInfo_fWinIni},
+            Windows::Win32::WindowsAndMessaging::{SystemParametersInfoW, SYSTEM_PARAMETERS_INFO_ACTION, SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS},
         );
     }
 }
