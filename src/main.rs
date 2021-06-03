@@ -3,7 +3,7 @@ mod bindings {
     windows::include_bindings!();
 }
 
-use bindings::Windows::Win32::WindowsAndMessaging::{SystemParametersInfoW, SYSTEM_PARAMETERS_INFO_ACTION, SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS};
+use bindings::Windows::Win32::UI::WindowsAndMessaging::{SystemParametersInfoW, SPIF_SENDCHANGE, SPIF_UPDATEINIFILE, SPI_SETDESKWALLPAPER};
 use {
     core::ffi::c_void,
     image::{load_from_memory_with_format, ImageFormat},
@@ -40,14 +40,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     path.push(0);
     let path_ptr = path.as_mut_ptr() as *mut c_void;
 
-    let rc = unsafe {
-        SystemParametersInfoW(
-            SYSTEM_PARAMETERS_INFO_ACTION::SPI_SETDESKWALLPAPER,
-            0,
-            path_ptr,
-            SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS::SPIF_UPDATEINIFILE | SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS::SPIF_SENDCHANGE,
-        )
-    };
+    let rc = unsafe { SystemParametersInfoW(SPI_SETDESKWALLPAPER, 0, path_ptr, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE) };
     if !rc.as_bool() {
         return Err(match std::io::Error::last_os_error().raw_os_error() {
             Some(e) => format!("SystemParametersInfoW a retourné le code d'erreur {}", e).into(),
