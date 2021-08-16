@@ -7,7 +7,6 @@ use bindings::Windows::Win32::UI::WindowsAndMessaging::{SystemParametersInfoW, S
 use {
     core::ffi::c_void,
     image::{load_from_memory_with_format, ImageFormat},
-    minreq,
     serde_json::value::Value,
     std::env,
     std::error::Error,
