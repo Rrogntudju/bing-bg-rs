@@ -1,9 +1,5 @@
 // Téléchargement de l'image Bing du jour et installation comme arrière-plan dans Windows
-mod bindings {
-    windows::include_bindings!();
-}
-
-use bindings::Windows::Win32::UI::WindowsAndMessaging::{SystemParametersInfoW, SPIF_SENDCHANGE, SPIF_UPDATEINIFILE, SPI_SETDESKWALLPAPER};
+use windows::Win32::UI::WindowsAndMessaging::{SystemParametersInfoW, SPIF_SENDCHANGE, SPIF_UPDATEINIFILE, SPI_SETDESKWALLPAPER};
 use {
     core::ffi::c_void,
     image::{load_from_memory_with_format, ImageFormat},
