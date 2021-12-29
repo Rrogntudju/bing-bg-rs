@@ -25,7 +25,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let url_img = "https://www.bing.com".to_owned() + url.unwrap();
 
     println!("Téléchargement de l'image JPEG...");
-    let handle = tokio::spawn(async move {
+    let task = tokio::spawn(async move {
         let response = client.get(&url_img).send().await?;
         response.bytes().await
     });
@@ -34,7 +34,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     bmp_path.set_extension("bmp");
 
     println!("Transformer en BMP et sauvegarder...");
-    let bmp = handle.await??.to_vec();
+    let bmp = task.await??.to_vec();
     let img = load_from_memory_with_format(&bmp, ImageFormat::Jpeg)?;
     img.save(&bmp_path)?;
 
