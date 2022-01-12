@@ -23,18 +23,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
         return Err(format!("La propriété «url» est absente du descriptif JSON. Vérifier dans {}", URL_DESC).into());
     }
     let url_img = "https://www.bing.com".to_owned() + url.unwrap();
+    let task = tokio::spawn(async move { client.get(&url_img).send().await?.bytes().await });
 
     println!("Téléchargement de l'image JPEG...");
-    let task = tokio::spawn(async move {
-        let response = client.get(&url_img).send().await?;
-        response.bytes().await
-    });
     let mut bmp_path = env::temp_dir();
     bmp_path.push("bingbg");
     bmp_path.set_extension("bmp");
+    let bmp = task.await??.to_vec();
 
     println!("Transformer en BMP et sauvegarder...");
-    let bmp = task.await??.to_vec();
     let img = load_from_memory_with_format(&bmp, ImageFormat::Jpeg)?;
     img.save(&bmp_path)?;
 
