@@ -39,7 +39,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //convertir la chaîne utf-8 en chaîne utf-16 terminée par null
     let mut path: Vec<u16> = bmp_path.to_str().unwrap().encode_utf16().collect();
     path.push(0);
-    let path_ptr = path.as_mut_ptr() as *mut c_void;
+    let path_ptr = Some(path.as_mut_ptr() as *mut c_void);
 
     let rc = unsafe { SystemParametersInfoW(SPI_SETDESKWALLPAPER, 0, path_ptr, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE) };
     if !rc.as_bool() {
