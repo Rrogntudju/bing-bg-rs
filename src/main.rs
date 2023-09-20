@@ -42,7 +42,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let path_ptr = Some(path.as_mut_ptr() as *mut c_void);
 
     let rc = unsafe { SystemParametersInfoW(SPI_SETDESKWALLPAPER, 0, path_ptr, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE) };
-    if !rc.as_bool() {
+    if !rc.is_ok() {
         return Err(match std::io::Error::last_os_error().raw_os_error() {
             Some(e) => format!("SystemParametersInfoW a retourné le code d'erreur {}", e).into(),
             None => "Oups!".into(),
