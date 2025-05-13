@@ -1,6 +1,12 @@
 // Téléchargement de l'image Bing du jour et installation comme arrière-plan dans Cosmic
 use {
-    cosmic_bg_config, image::{load_from_memory_with_format, ImageFormat}, reqwest::Client, serde_json::value::Value, std::{env, error::Error, fs::{self, create_dir, exists}, time::Duration}
+    cosmic_bg_config,
+    image::{load_from_memory_with_format, ImageFormat},
+    reqwest::Client,
+    serde_json::value::Value,
+    std::{
+        env, error::Error, fs::create_dir, path::Path, time::Duration
+    },
 };
 
 const URL_DESC: &str = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US";
@@ -19,17 +25,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let task = tokio::spawn(async move { client.get(&url_img).send().await?.bytes().await });
 
     println!("Téléchargement de l'image JPEG...");
-    let home = env::vars().find(|v| v.0 == "HOME").map(|v| v.1).unwrap();
-    let bg_path = [home, "/.Bingbg".to_string()].concat();
-    if !exists(&bg_path).unwrap() {
-        create_dir(&bg_path).unwrap();
+    if let Some(home) = env::vars().find(|v| v.0 == "HOME").map(|v| v.1) {
+        let bg_path = Path::new(&home).join(".Bingbg");
+        if !bg_path.exists() {
+            create_dir(&bg_path)?;
+        }
+        let img = task.await??.to_vec();
+        let img = load_from_memory_with_format(&img, ImageFormat::Jpeg)?;
+        img.save(&bg_path)?;
+
+        println!("Configurer l'image comme arrière-plan...");
+    } else {
+        println!("La variable d'environment HOME n'est pas configurée")
     }
-    let img = task.await??.to_vec();
-    let img = load_from_memory_with_format(&img, ImageFormat::Jpeg)?;
-    img.save(&bg_path)?;
-
-    println!("Configurer l'image comme arrière-plan...");
-
 
     println!("Terminé!");
     Ok(())
