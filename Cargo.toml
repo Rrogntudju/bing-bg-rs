@@ -9,6 +9,7 @@ reqwest = "0.12"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 image = { version = "0.25", default-features = false, features = ["jpeg", "bmp"] }
 serde_json = "1"
+cosmic-bg-config = { git = "https://github.com/pop-os/cosmic-bg.git" }
 
 [profile.release]
 opt-level = 3
