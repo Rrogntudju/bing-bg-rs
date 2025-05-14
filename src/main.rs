@@ -1,12 +1,9 @@
 // Téléchargement de l'image Bing du jour et installation comme arrière-plan dans Cosmic
 use {
     cosmic_bg_config,
-    image::{load_from_memory_with_format, ImageFormat},
     reqwest::Client,
     serde_json::value::Value,
-    std::{
-        env, error::Error, fs::create_dir, path::Path, time::Duration
-    },
+    std::{env, error::Error, fs, io::Write, path::Path, time::Duration},
 };
 
 const URL_DESC: &str = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US";
@@ -22,7 +19,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         return Err(format!("La propriété «url» est absente du descriptif JSON. Vérifier dans {}", URL_DESC).into());
     }
     let url_img = "https://www.bing.com".to_owned() + url.unwrap();
-    let task = tokio::spawn(async move { client.get(&url_img).send().await?.bytes().await });
+    let download_task = tokio::spawn(async move { client.get(&url_img).send().await?.bytes().await });
 
     println!("Téléchargement de l'image JPEG...");
     let home = if let Some(home) = env::vars().find(|v| v.0 == "HOME").map(|v| v.1) {
@@ -32,12 +29,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     };
     let bg_path = Path::new(&home).join(".Bingbg");
     if !bg_path.exists() {
-        create_dir(&bg_path)?;
+        fs::create_dir(&bg_path)?;
     }
-    let img = task.await??.to_vec();
-    let img = load_from_memory_with_format(&img, ImageFormat::Jpeg)?;
+    let img = download_task.await??.to_vec();
     let bg_path = bg_path.with_file_name("bingbg.jpg");
-    img.save(&bg_path)?;
+    let mut bg = fs::File::create(bg_path)?;
+    bg.write_all(&img)?;
 
     println!("Configurer l'image comme arrière-plan...");
 
