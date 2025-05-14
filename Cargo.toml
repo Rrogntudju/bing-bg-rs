@@ -1,5 +1,5 @@
 [package]
-name = "Bingbg"
+name = "bingbg"
 version = "0.2.0"
 authors = ["Rrogntudju"]
 edition = "2024"
