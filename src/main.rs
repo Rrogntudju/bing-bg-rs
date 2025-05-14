@@ -32,11 +32,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
         let img = task.await??.to_vec();
         let img = load_from_memory_with_format(&img, ImageFormat::Jpeg)?;
+        let bg_path = bg_path.with_file_name("bingbg.jpg");
         img.save(&bg_path)?;
 
         println!("Configurer l'image comme arrière-plan...");
     } else {
-        println!("La variable d'environment HOME n'est pas configurée")
+        return Err(format!("La variable d'environment HOME n'est pas configurée").into());
     }
 
     println!("Terminé!");
