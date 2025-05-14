@@ -10,18 +10,19 @@ const URL_DESC: &str = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    //Téléchargement du descriptif de l'image
+    // Téléchargement du descriptif de l'image
     let client = Client::builder().timeout(Duration::from_secs(10)).build()?;
     let response = client.get(URL_DESC).send().await?.text().await?;
     let desc: Value = serde_json::from_str(&response)?;
-    let url = desc["images"][0]["url"].as_str();
-    if url.is_none() {
+    let url = if let Some(url) = desc["images"][0]["url"].as_str() {
+        url
+    } else {
         return Err(format!("La propriété «url» est absente du descriptif JSON. Vérifier dans {}", URL_DESC).into());
-    }
-    let url_img = "https://www.bing.com".to_owned() + url.unwrap();
+    };
+    let url_img = "https://www.bing.com".to_owned() + url;
     let download_task = tokio::spawn(async move { client.get(&url_img).send().await?.bytes().await });
 
-    //Téléchargement de l'image JPEG
+    // Téléchargement de l'image JPEG
     let home = if let Some(home) = env::vars().find(|v| v.0 == "HOME").map(|v| v.1) {
         home
     } else {
@@ -36,7 +37,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let mut bg = fs::File::create(bg_path)?;
     bg.write_all(&img)?;
 
-    //Configurer l'image comme arrière-plan
+    // Configurer l'image comme arrière-plan
 
     Ok(())
 }
