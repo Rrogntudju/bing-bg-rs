@@ -50,7 +50,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     config.set_entry(&context, background)?;
 
     // Supprimer l'ancienne image
-    fs::remove_file(to_delete)?;
+    fs::remove_file(to_delete).unwrap_or_default();
 
     Ok(())
 }
