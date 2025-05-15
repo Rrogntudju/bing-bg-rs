@@ -1,9 +1,11 @@
 // Téléchargement de l'image Bing du jour et installation comme arrière-plan dans Cosmic
 use {
-    cosmic_bg_config,
+    cosmic_bg_config::{self, Source},
     reqwest::Client,
     serde_json::value::Value,
     std::{env, error::Error, fs, io::Write, path::Path, time::Duration},
+    rand::distr::Alphanumeric,
+    rand::Rng
 };
 
 const URL_DESC: &str = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US";
@@ -33,11 +35,23 @@ async fn main() -> Result<(), Box<dyn Error>> {
         fs::create_dir(&bg_path)?;
     }
     let img = download_task.await??.to_vec();
-    let bg_path = bg_path.join("bingbg.jpg");
-    let mut bg = fs::File::create(bg_path)?;
+    let random_name: String = rand::rng()
+        .sample_iter(&Alphanumeric)
+        .take(10)
+        .map(char::from)
+        .collect();
+    let img_name = [&random_name, ".jpg"].concat();
+    let bg_path = bg_path.join(img_name);
+    let mut bg = fs::File::create(&bg_path)?;
     bg.write_all(&img)?;
 
     // Configurer l'image comme arrière-plan
+    let context = cosmic_bg_config::context()?;
+    let mut background = context.default_background();
+    background.source = Source::Path(bg_path);
+    let mut config = cosmic_bg_config::Config::load(&context)?;
+    config.set_entry(&context, background)?;
 
+    // Supprimer  
     Ok(())
 }
