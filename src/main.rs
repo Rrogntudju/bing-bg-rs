@@ -20,9 +20,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         return Err(format!("La propriété «url» est absente du descriptif JSON. Vérifier dans {}", URL_DESC).into());
     };
     let url_img = "https://www.bing.com".to_owned() + url;
-    let download_task = tokio::spawn(async move { client.get(&url_img).send().await?.bytes().await });
 
     // Téléchargement de l'image JPEG
+    let download_task = tokio::spawn(async move { client.get(&url_img).send().await?.bytes().await });
     let home = if let Some(home) = env::vars().find(|v| v.0 == "HOME").map(|v| v.1) {
         home
     } else {
