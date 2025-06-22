@@ -26,7 +26,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let home = if let Some(home) = env::vars().find(|v| v.0 == "HOME").map(|v| v.1) {
         home
     } else {
-        return Err(format!("La variable d'environment HOME n'est pas configurée").into());
+        return Err("La variable d'environment HOME n'est pas configurée".into());
     };
     let bg_path = Path::new(&home).join(".bingbg");
     if !bg_path.exists() {
