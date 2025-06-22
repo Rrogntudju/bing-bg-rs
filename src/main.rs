@@ -28,7 +28,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     } else {
         return Err("La variable d'environment HOME n'est pas configurée".into());
     };
-    let bg_path = Path::new(&home).join(".bingbg");
+    let bg_path = Path::new(&home).join(".local/share/bingbg");
     if !bg_path.exists() {
         fs::create_dir(&bg_path)?;
     }
