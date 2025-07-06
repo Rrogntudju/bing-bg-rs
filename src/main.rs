@@ -32,8 +32,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     if !bg_path.exists() {
         fs::create_dir(&bg_path)?;
     }
-    let img = download_task.await??.to_vec();
     let bg_file = bg_path.join("bingbg.jpg");
+    
+    let img = download_task.await??.to_vec();
     let mut bg = fs::File::create(&bg_file)?;
     bg.write_all(&img)?;
 
