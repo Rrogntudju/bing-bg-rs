@@ -33,12 +33,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         fs::create_dir(&bg_path)?;
     }
     let img = download_task.await??.to_vec();
-    let bg_file = bg_path.join("bingbg1.jpg");
-    let (bg_file, to_delete) = if bg_file.exists() {
-        (bg_path.join("bingbg2.jpg"), bg_file)
-    } else {
-        (bg_file, bg_path.join("bingbg2.jpg"))
-    };
+    let bg_file = bg_path.join("bingbg.jpg");
     let mut bg = fs::File::create(&bg_file)?;
     bg.write_all(&img)?;
 
@@ -48,9 +43,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     background.source = Source::Path(bg_file);
     let mut config = cosmic_bg_config::Config::load(&context)?;
     config.set_entry(&context, background)?;
-
-    // Supprimer l'ancienne image
-    fs::remove_file(to_delete).unwrap_or_default();
 
     Ok(())
 }
