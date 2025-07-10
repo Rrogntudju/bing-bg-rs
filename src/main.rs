@@ -54,7 +54,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         bg_entries.push((entry.metadata()?.created()?.elapsed()?, entry.path()));
     }
     bg_entries.sort_by_key(|(d, _)| *d);
-    bg_entries.iter().skip(7).for_each(|(_, p)| fs::remove_file(p).unwrap_or_default());
-
+    for (_, path) in bg_entries.iter().skip(7) {
+        fs::remove_file(path)?;
+    }
+    
     Ok(())
 }
