@@ -45,7 +45,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let mut background = context.default_background();
     background.source = Source::Path(bg_file);
     let mut config = cosmic_bg_config::Config::load(&context)?;
-    let _ = context.set_same_on_all(config.same_on_all);
     config.set_entry(&context, background)?;
 
     //Ménage
