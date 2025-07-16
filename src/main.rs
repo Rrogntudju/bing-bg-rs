@@ -22,12 +22,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Téléchargement de l'image JPEG
     let download_task = tokio::spawn(async move { client.get(&url_img).send().await?.bytes().await });
-    let home = if let Some(home) = env::vars().find(|v| v.0 == "HOME").map(|v| v.1) {
-        home
+    let bg_path = if let Some(home) = env::vars().find(|v| v.0 == "HOME").map(|v| v.1) {
+        Path::new(&home).join(".local/share/bingbg")
     } else {
         return Err("La variable d'environment HOME n'est pas configurée".into());
     };
-    let bg_path = Path::new(&home).join(".local/share/bingbg");
     if !bg_path.exists() {
         fs::create_dir(&bg_path)?;
     }
