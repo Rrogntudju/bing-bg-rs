@@ -94,6 +94,8 @@ async fn main() {
     }
     log::set_max_level(LevelFilter::Info);
 
-    set_bing_background().await.unwrap_or_else(|e| error!("{e}"));
-    info!("Fait");
+    match set_bing_background().await {
+        Ok(_) => info!("Fait"),
+        Err(e) => error!("{e}"),
+    }
 }
