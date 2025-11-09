@@ -1,15 +1,39 @@
 // Téléchargement de l'image Bing du jour et installation comme arrière-plan dans Cosmic
 use {
     cosmic_bg_config::{self, Source},
+    log::{LevelFilter, Log, error, info},
     reqwest::Client,
     serde_json::value::Value,
-    std::{env, error::Error, fs, io::Write, path::{Path, PathBuf}, time::Duration},
+    std::{
+        env,
+        error::Error,
+        fs,
+        io::Write,
+        path::{Path, PathBuf},
+        time::Duration,
+    },
+    systemd_journal_logger::{JournalLog, connected_to_journal},
 };
 
 const URL_DESC: &str = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US";
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+struct SimpleLogger;
+
+impl Log for SimpleLogger {
+    fn enabled(&self, _metadata: &log::Metadata) -> bool {
+        true
+    }
+
+    fn log(&self, record: &log::Record) {
+        let _ = writeln!(std::io::stderr(), "{}", record.args());
+    }
+
+    fn flush(&self) {
+        let _ = std::io::stderr().flush();
+    }
+}
+
+async fn set_bing_background() -> Result<(), Box<dyn Error>> {
     // Téléchargement du descriptif de l'image
     let client = Client::builder().timeout(Duration::from_secs(10)).build()?;
     let response = client.get(URL_DESC).send().await?.text().await?;
@@ -56,6 +80,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
     for (_, path) in bg_entries.iter().skip(20) {
         fs::remove_file(path)?;
     }
-    
+
     Ok(())
+}
+
+#[tokio::main]
+async fn main() {
+    // Configurer le log
+    if connected_to_journal() {
+        JournalLog::new().unwrap().install().unwrap();
+    } else {
+        log::set_logger(&SimpleLogger).unwrap();
+    }
+    log::set_max_level(LevelFilter::Info);
+
+    set_bing_background().await.unwrap_or_else(|e| error!("{e}"));
+    info!("Fait");
 }
