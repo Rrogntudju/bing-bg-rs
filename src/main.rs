@@ -9,6 +9,7 @@ use {
         error::Error,
         fs,
         io::Write,
+        io::stderr,
         path::{Path, PathBuf},
         time::Duration,
     },
@@ -25,11 +26,11 @@ impl Log for SimpleLogger {
     }
 
     fn log(&self, record: &log::Record) {
-        let _ = writeln!(std::io::stderr(), "{}", record.args());
+        let _ = writeln!(stderr(), "{}", record.args());
     }
 
     fn flush(&self) {
-        let _ = std::io::stderr().flush();
+        let _ = stderr().flush();
     }
 }
 
