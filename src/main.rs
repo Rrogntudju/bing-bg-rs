@@ -85,14 +85,16 @@ async fn set_bing_background() -> Result<(), Box<dyn Error>> {
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), Box<dyn Error>> {
     // Configurer le log
     if connected_to_journal() {
-        JournalLog::new().unwrap().install().unwrap();
+        JournalLog::new()?.install()?;
     } else {
-        log::set_logger(&SimpleLogger).unwrap();
+        log::set_logger(&SimpleLogger)?;
     }
     log::set_max_level(LevelFilter::Error);
 
     set_bing_background().await.unwrap_or_else(|e| error!("{e}"));
+
+    Ok(())
 }
