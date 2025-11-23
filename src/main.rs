@@ -94,7 +94,5 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
     log::set_max_level(LevelFilter::Error);
 
-    set_bing_background().await.unwrap_or_else(|e| error!("{e}"));
-
-    Ok(())
+    Ok(set_bing_background().await.unwrap_or_else(|e| error!("{e}")))
 }
