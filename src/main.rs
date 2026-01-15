@@ -70,7 +70,7 @@ async fn set_bing_background() -> Result<(), Box<dyn Error>> {
     let mut config = cosmic_bg_config::Config::load(&context)?;
     config.set_entry(&context, background)?;
 
-    //Ménage
+    // Ménage
     let mut bg_entries: Vec<(Duration, PathBuf)> = Vec::new();
     for entry in fs::read_dir(bg_path)? {
         let entry = entry?;
