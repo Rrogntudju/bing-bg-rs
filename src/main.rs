@@ -10,7 +10,7 @@ use {
     std::time::Duration,
 };
 
-const URL_DESC: &str = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US";
+const URL_DESC: &str = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=fr-CA";
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
