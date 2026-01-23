@@ -15,7 +15,7 @@ use {
     systemd_journal_logger::{JournalLog, connected_to_journal},
 };
 
-const URL_DESC: &str = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US";
+const URL_DESC: &str = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=fr-CA";
 
 struct SimpleLogger;
 
