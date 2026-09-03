@@ -1,7 +1,7 @@
 // Téléchargement de l'image Bing du jour et installation comme arrière-plan dans Cosmic
 use {
     cosmic_bg_config::{self, Source},
-    log::{LevelFilter, Log, error},
+    log::{LevelFilter, Log},
     reqwest::Client,
     serde_json::value::Value,
     std::{
@@ -93,6 +93,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         log::set_logger(&SimpleLogger)?;
     }
     log::set_max_level(LevelFilter::Error);
-
-    Ok(set_bing_background().await.unwrap_or_else(|e| error!("{e}")))
+    
+    set_bing_background().await
 }
