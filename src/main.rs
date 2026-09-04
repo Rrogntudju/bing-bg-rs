@@ -1,7 +1,7 @@
 // Téléchargement de l'image Bing du jour et installation comme arrière-plan dans Cosmic
 use {
     cosmic_bg_config::{self, Source},
-    failure::{Error, format_err},
+    anyhow::{Error, format_err},
     log::{LevelFilter, Log},
     reqwest::Client,
     serde_json::value::Value,
