@@ -64,11 +64,24 @@ async fn set_bing_background() -> Result<(), Error> {
     bg.write_all(&img)?;
 
     // Configurer l'image comme arrière-plan
-    let context = cosmic_bg_config::context()?;
-    let mut background = context.default_background();
-    background.source = Source::Path(bg_file);
-    let mut config = cosmic_bg_config::Config::load(&context)?;
-    config.set_entry(&context, background)?;
+    let contexts = cosmic_bg_config::Mode::ALL
+        .into_iter()
+        .filter_map(|mode| match mode.context() {
+            Ok(context) => Some(context),
+            Err(why) => {
+                log::error!("failed to read background config: {why}");
+                None
+            }
+        })
+        .collect::<Vec<_>>();
+
+    // Méme arrière-plan pour chaque mode
+    for context in contexts {
+        let mut background = context.default_background();
+        background.source = Source::Path(bg_file.clone());
+        let mut config = cosmic_bg_config::Config::load(&context)?;
+        config.set_entry(&context, background)?;
+    }
 
     // Ménage
     let mut bg_entries: Vec<(Duration, PathBuf)> = Vec::new();
