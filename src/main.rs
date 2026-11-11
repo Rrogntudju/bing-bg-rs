@@ -39,7 +39,7 @@ async fn set_bing_background() -> Result<(), Error> {
     let desc: Value = serde_json::from_str(&response)?;
     let url_img = desc["images"][0]["url"]
         .as_str()
-        .and_then(|url| Some("https://www.bing.com".to_owned() + url))
+        .and_then(|url| Some("https://www.bing.com".to_owned() + &url.replacen("_1920x1080", "_UHD", 2)))
         .ok_or(anyhow!("La propriété «url» est absente du descriptif JSON. Vérifier dans {URL_DESC}"))?;
 
     // Téléchargement de l'image JPEG
