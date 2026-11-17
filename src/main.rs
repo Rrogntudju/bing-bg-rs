@@ -9,7 +9,7 @@ use {
     serde_json::value::Value,
     std::{
         env, fs,
-        io::{Write, stderr},
+        io::{Cursor, Write, stderr},
         path::{Path, PathBuf},
         time::Duration,
     },
@@ -86,7 +86,7 @@ async fn set_bing_background() -> Result<(), Error> {
     }
 
     // Obtenir la couleur dominante de l'image
-    let bg = image::open(bg_file)?.to_rgb8();
+    let bg = image::ImageReader::new(Cursor::new(&img)).with_guessed_format()?.decode()?.to_rgb8();
     let input = okmain::InputImage::try_from(&bg)?;
     let output = okmain::colors(input)[0];
     let bg_dominant_color = Srgba::new(f32::from(output.r) / 255.0, f32::from(output.g) / 255.0, f32::from(output.b) / 255.0, 1.0);
