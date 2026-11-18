@@ -71,7 +71,7 @@ async fn set_bing_background() -> Result<(), Error> {
         .filter_map(|mode| match mode.context() {
             Ok(context) => Some(context),
             Err(why) => {
-                log::error!("failed to read background config: {why}");
+                log::error!("Erreur lors de la création du contexte: {why}");
                 None
             }
         })
@@ -134,5 +134,5 @@ async fn main() -> Result<(), Error> {
     }
     log::set_max_level(LevelFilter::Error);
 
-    set_bing_background().await
+    set_bing_background().await.inspect_err(|why| log::error!("{why}"))
 }
