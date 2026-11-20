@@ -65,18 +65,9 @@ async fn set_bing_background() -> Result<(), Error> {
     let img = download_task.await??.to_vec();
     bg.write_all(&img)?;
 
-    // Configurer l'image comme arrière-plan
-    let contexts = Mode::ALL
-        .into_iter()
-        .filter_map(|mode| {
-            mode.context()
-                .inspect_err(|why| log::error!("Erreur lors de la création du contexte: {why}"))
-                .ok()
-        })
-        .collect::<Vec<_>>();
-
-    // Méme arrière-plan pour chaque mode
-    for context in contexts {
+    // Pour chaque mode, configurer l'image comme arrière-plan
+    for mode in Mode::ALL {
+        let context = mode.context()?;
         let mut background = context.default_background();
         background.source = Source::Path(bg_file.clone());
         let mut config = cosmic_bg_config::Config::load(&context)?;
