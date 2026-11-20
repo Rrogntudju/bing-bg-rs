@@ -68,12 +68,10 @@ async fn set_bing_background() -> Result<(), Error> {
     // Configurer l'image comme arrière-plan
     let contexts = Mode::ALL
         .into_iter()
-        .filter_map(|mode| match mode.context() {
-            Ok(context) => Some(context),
-            Err(why) => {
-                log::error!("Erreur lors de la création du contexte: {why}");
-                None
-            }
+        .filter_map(|mode| {
+            mode.context()
+                .inspect_err(|why| log::error!("Erreur lors de la création du contexte: {why}"))
+                .ok()
         })
         .collect::<Vec<_>>();
 
