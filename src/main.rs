@@ -50,7 +50,7 @@ async fn set_bing_background() -> Result<(), Error> {
     let bg_path = env::vars()
         .find(|v| v.0 == "HOME")
         .map(|v| v.1)
-        .and_then(|home| Some(Path::new(&home).join(".local/share/bingbg")))
+        .and_then(|home| Some(Path::new(&home).join("Images/bingbg")))
         .ok_or(anyhow!("La variable d'environment HOME n'est pas configurée"))?;
     if !bg_path.exists() {
         fs::create_dir(&bg_path)?;
