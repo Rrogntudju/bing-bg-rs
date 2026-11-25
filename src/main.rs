@@ -14,6 +14,7 @@ use {
         time::Duration,
     },
     systemd_journal_logger::{JournalLog, connected_to_journal},
+    tokio::task,
 };
 
 const URL_DESC: &str = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=fr-CA";
@@ -45,8 +46,7 @@ async fn set_bing_background() -> Result<(), Error> {
         .ok_or(anyhow!("La propriété «url» est absente du descriptif JSON. Vérifier dans {URL_DESC}"))?;
 
     // Téléchargement de l'image JPEG
-    let download_task = tokio::spawn(async move { client.get(&url_img).send().await?.bytes().await });
-
+    let download_task = task::spawn(async move { client.get(&url_img).send().await?.bytes().await });
     let bg_path = env::vars()
         .find(|v| v.0 == "HOME")
         .map(|v| v.1)
@@ -55,15 +55,26 @@ async fn set_bing_background() -> Result<(), Error> {
     if !bg_path.exists() {
         fs::create_dir(&bg_path)?;
     }
-
     let bg_file = desc["images"][0]["title"]
         .as_str()
         .and_then(|titre| Some(bg_path.join(titre.to_owned() + ".jpg")))
         .ok_or(anyhow!("La propriété «title» est absente du descriptif JSON. Vérifier dans {URL_DESC}"))?;
     let mut bg = fs::File::create(&bg_file)?;
-
     let img = download_task.await??.to_vec();
     bg.write_all(&img)?;
+
+    // Obtenir la couleur dominante de l'image
+    let dominant_color_task: task::JoinHandle<Result<Srgba, Error>> = task::spawn_blocking(move || {
+        let bg = image::ImageReader::new(Cursor::new(&img)).with_guessed_format()?.decode()?.to_rgb8();
+        let input = okmain::InputImage::try_from(&bg)?;
+        let output = okmain::colors(input)[0];
+        Ok(Srgba::new(
+            f32::from(output.r) / 255.0,
+            f32::from(output.g) / 255.0,
+            f32::from(output.b) / 255.0,
+            1.0,
+        ))
+    });
 
     // Pour chaque mode, configurer l'image comme arrière-plan
     for mode in Mode::ALL {
@@ -74,16 +85,9 @@ async fn set_bing_background() -> Result<(), Error> {
         config.set_entry(&context, background)?;
     }
 
-    // Obtenir la couleur dominante de l'image
-    let bg = image::ImageReader::new(Cursor::new(&img)).with_guessed_format()?.decode()?.to_rgb8();
-    let input = okmain::InputImage::try_from(&bg)?;
-    let output = okmain::colors(input)[0];
-    let bg_dominant_color = Srgba::new(f32::from(output.r) / 255.0, f32::from(output.g) / 255.0, f32::from(output.b) / 255.0, 1.0);
-
     // Reconstruire le thème clair et le thème sombre avec la couleur dominante du fond d'écran comme accent
     let dark_config = Theme::dark_config()?;
     let light_config = Theme::light_config()?;
-
     let dark_theme = match Theme::get_entry(&dark_config) {
         Ok(entry) => entry,
         Err(err) => return Err(anyhow!(err.0[0].to_string())),
@@ -92,10 +96,9 @@ async fn set_bing_background() -> Result<(), Error> {
         Ok(entry) => entry,
         Err(err) => return Err(anyhow!(err.0[0].to_string())),
     };
-
+    let bg_dominant_color = dominant_color_task.await??;
     let dark_theme = dark_theme.with_accent(bg_dominant_color);
     let light_theme = light_theme.with_accent(bg_dominant_color);
-
     dark_theme.write_entry(&dark_config)?;
     light_theme.write_entry(&light_config)?;
 
